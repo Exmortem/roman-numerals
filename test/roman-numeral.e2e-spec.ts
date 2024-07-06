@@ -114,23 +114,13 @@ describe('RomanNumeralController - New Tests (e2e)', () => {
     await request(app.getHttpServer()).get('/romannumeral').expect(400)
   })
 
-  it('/romannumeral (GET) - range query with valid minimum and maximum values', async () => {
-    const min = 1
-    const max = 5
-    const response = await request(app.getHttpServer())
+  it('/romannumeral (GET) - range query minimum value larger than maximum value', async () => {
+    const min = 5
+    const max = 3
+    await request(app.getHttpServer())
       .get('/romannumeral')
       .query({ min, max })
-      .expect(200)
-
-    expect(response.body).toEqual({
-      conversions: [
-        { input: '1', output: 'I' },
-        { input: '2', output: 'II' },
-        { input: '3', output: 'III' },
-        { input: '4', output: 'IV' },
-        { input: '5', output: 'V' },
-      ],
-    })
+      .expect(400)
   })
 
   it('/romannumeral (GET) - query parameter below valid range', async () => {

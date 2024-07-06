@@ -23,7 +23,7 @@ describe('RomanNumeralService', () => {
     }
 
     const mockMetricService = {
-      getCounter: jest.fn((name: string) => mockCounter),
+      getCounter: jest.fn(() => mockCounter),
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -53,8 +53,12 @@ describe('RomanNumeralService', () => {
     logger = module.get<Logger>(WINSTON_MODULE_NEST_PROVIDER)
     cacheManager = module.get<Cache>(CACHE_MANAGER)
     metricService = module.get<MetricService>(MetricService)
-    romanNumeralFromCacheCounter = metricService.getCounter('roman_numeral_from_cache_counter')
-    romanNumeralCalledCounter = metricService.getCounter('roman_numeral_called_counter')
+    romanNumeralFromCacheCounter = metricService.getCounter(
+      'roman_numeral_from_cache_counter',
+    )
+    romanNumeralCalledCounter = metricService.getCounter(
+      'roman_numeral_called_counter',
+    )
   })
 
   it('should be defined', () => {
@@ -72,7 +76,8 @@ describe('RomanNumeralService', () => {
 
     expect(result).toEqual({ input: '1990', output: 'MCMXC' })
 
-    const cachedResult = await cacheManager.get<RomanNumeralConversion>('query:1990')
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversion>('query:1990')
     expect(cachedResult).toEqual(result)
 
     expect(romanNumeralCalledCounter.add).toHaveBeenCalledWith(1)
@@ -129,7 +134,8 @@ describe('RomanNumeralService', () => {
       ],
     })
 
-    const cachedResult = await cacheManager.get<RomanNumeralConversions>('range:1:3')
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversions>('range:1:3')
     expect(cachedResult).toEqual(result)
 
     expect(romanNumeralCalledCounter.add).toHaveBeenCalledWith(1)
@@ -213,7 +219,8 @@ describe('RomanNumeralService', () => {
     const result = await service.getRomanNumeral(request)
 
     expect(result).toEqual({ input: '1987', output: 'MCMLXXXVII' })
-    const cachedResult = await cacheManager.get<RomanNumeralConversion>('query:1987')
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversion>('query:1987')
     expect(cachedResult).toEqual(result)
 
     expect(romanNumeralCalledCounter.add).toHaveBeenCalledWith(1)
@@ -233,11 +240,10 @@ describe('RomanNumeralService', () => {
       ],
     })
 
-    const cachedResult = await cacheManager.get<RomanNumeralConversions>('range:1:5')
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversions>('range:1:5')
     expect(cachedResult).toEqual(result)
 
     expect(romanNumeralCalledCounter.add).toHaveBeenCalledWith(1)
   })
 })
-
-
