@@ -8,6 +8,7 @@ import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston'
 import { WinstonConfigService } from '../src/services/winston-config.service'
 import { ClsModule } from 'nestjs-cls'
 import { v4 as uuidv4 } from 'uuid'
+import { OpenTelemetryModule } from 'nestjs-otel'
 
 describe('RomanNumeralController - New Tests (e2e)', () => {
   let app: INestApplication
@@ -32,6 +33,15 @@ describe('RomanNumeralController - New Tests (e2e)', () => {
               const id = req.headers['x-request-id'] || uuidv4()
               req.headers['x-request-id'] = id
               return id
+            },
+          },
+        }),
+        OpenTelemetryModule.forRoot({
+          metrics: {
+            hostMetrics: true,
+            apiMetrics: {
+              enable: true,
+              prefix: 'roman_numeral',
             },
           },
         }),
