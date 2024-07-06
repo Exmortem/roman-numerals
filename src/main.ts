@@ -16,6 +16,8 @@ async function bootstrap() {
       hsts: true,
       hidePoweredBy: true,
       xXssProtection: true,
+      noSniff: true,
+      contentSecurityPolicy: false
     }),
   )
 
