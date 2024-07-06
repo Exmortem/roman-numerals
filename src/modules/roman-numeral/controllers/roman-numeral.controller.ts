@@ -45,7 +45,9 @@ export class RomanNumeralController {
       },
     },
   })
-  @ApiBadRequestResponse({ description: 'Bad Request (you must provide either a query or a range)' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request (you must provide either a query or a range)',
+  })
   @UsePipes(new ValidationPipe({ transform: true }))
   public async getRomanNumeral(
     @Query() romanNumeralRequest: RomanNumeralRequest,
