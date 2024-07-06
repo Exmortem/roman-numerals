@@ -144,4 +144,58 @@ describe('RomanNumeralService', () => {
     )
     expect(errorSpy).toHaveBeenCalledWith('No query or range provided.')
   })
+
+  // Additional tests to improve coverage
+
+  it('should throw InternalServerErrorException if only min is defined', async () => {
+    const errorSpy = jest.spyOn(logger, 'error')
+    const request: RomanNumeralRequest = { min: 1 }
+    await expect(service.getRomanNumeral(request)).rejects.toThrow(
+      'Could not determine the type of conversion to perform.',
+    )
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Could not determine the type of conversion to perform.',
+    )
+  })
+
+  it('should throw InternalServerErrorException if only max is defined', async () => {
+    const errorSpy = jest.spyOn(logger, 'error')
+    const request: RomanNumeralRequest = { max: 10 }
+    await expect(service.getRomanNumeral(request)).rejects.toThrow(
+      'Could not determine the type of conversion to perform.',
+    )
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Could not determine the type of conversion to perform.',
+    )
+  })
+
+  it('should convert a single number to a Roman numeral when the cache is empty', async () => {
+    const request: RomanNumeralRequest = { query: 1987 }
+    await cacheManager.del('query:1987')
+    const result = await service.getRomanNumeral(request)
+
+    expect(result).toEqual({ input: '1987', output: 'MCMLXXXVII' })
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversion>('query:1987')
+    expect(cachedResult).toEqual(result)
+  })
+
+  it('should convert a range of numbers in parallel chunks', async () => {
+    const request: RomanNumeralRequest = { min: 1, max: 5 }
+    const result = await service.getRomanNumeral(request)
+
+    expect(result).toEqual({
+      conversions: [
+        { input: '1', output: 'I' },
+        { input: '2', output: 'II' },
+        { input: '3', output: 'III' },
+        { input: '4', output: 'IV' },
+        { input: '5', output: 'V' },
+      ],
+    })
+
+    const cachedResult =
+      await cacheManager.get<RomanNumeralConversions>('range:1:5')
+    expect(cachedResult).toEqual(result)
+  })
 })
