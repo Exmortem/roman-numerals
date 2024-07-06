@@ -6,6 +6,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import {
+  ApiBadRequestResponse,
   ApiExtraModels,
   ApiOperation,
   ApiResponse,
@@ -16,11 +17,6 @@ import { RomanNumeralRequest } from '../inputs/roman-numeral-request.dto'
 import { RomanNumeralService } from '../services/roman-numeral.service'
 import { RomanNumeralConversion } from '../responses/roman-numeral-conversion.dto'
 import { RomanNumeralConversions } from '../responses/roman-numeral-conversions.dto'
-
-// TODO: clean up packages
-
-// possible switch to pino
-// custom metric in telemetry - cached hits vs generated hits
 
 // TODO: add bad request descriptions
 @ApiTags('Roman Numeral')
@@ -49,6 +45,7 @@ export class RomanNumeralController {
       },
     },
   })
+  @ApiBadRequestResponse({ description: 'Bad Request (you must provide either a query or a range)' })
   @UsePipes(new ValidationPipe({ transform: true }))
   public async getRomanNumeral(
     @Query() romanNumeralRequest: RomanNumeralRequest,
