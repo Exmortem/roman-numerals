@@ -34,6 +34,12 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Linting
+```bash
+ #run linting
+ $ npm run lint
+```
+
 ## Telemetry
 
 Telemetry can be accessed through the following URLs when running from docker-compose:
