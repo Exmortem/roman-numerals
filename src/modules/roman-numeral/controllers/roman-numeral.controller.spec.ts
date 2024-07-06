@@ -7,12 +7,20 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston'
 import { RomanNumeralConversions } from '../responses/roman-numeral-conversions.dto'
 import { CacheModule } from '@nestjs/cache-manager'
 import { InternalServerErrorException } from '@nestjs/common'
+import { MetricService } from 'nestjs-otel'
 
 describe('RomanNumeralController', () => {
   let controller: RomanNumeralController
   let service: RomanNumeralService
 
   beforeEach(async () => {
+    const mockCounter = {
+      add: jest.fn(),
+    }
+
+    const mockMetricService = {
+      getCounter: jest.fn().mockReturnValue(mockCounter),
+    }
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         CacheModule.register({
@@ -29,6 +37,10 @@ describe('RomanNumeralController', () => {
             log: jest.fn(),
             error: jest.fn(),
           },
+        },
+        {
+          provide: MetricService,
+          useValue: mockMetricService,
         },
       ],
     }).compile()

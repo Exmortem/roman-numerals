@@ -11,20 +11,35 @@ import { Cache } from 'cache-manager'
 import { RomanNumeralRequest } from '../inputs/roman-numeral-request.dto'
 import { RomanNumeralConversion } from '../responses/roman-numeral-conversion.dto'
 import { RomanNumeralConversions } from '../responses/roman-numeral-conversions.dto'
+import { MetricService } from 'nestjs-otel'
+import { Counter } from '@opentelemetry/api'
 
 @Injectable()
 export class RomanNumeralService {
+  private romanNumeralFromCacheCounter: Counter;
+  private romanNumeralCalledCounter: Counter;
+
   constructor(
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    private readonly metricService: MetricService
+  ) {
+    this.romanNumeralFromCacheCounter = this.metricService.getCounter('roman_numeral_from_cache_counter', {
+      description: 'How many times a roman numeral was pulled from the cache',
+    });
+  
+    this.romanNumeralCalledCounter = this.metricService.getCounter('roman_numeral_called_counter', {
+      description: 'How many times getRomanNumeral was called',
+    });
+  }
 
   public async getRomanNumeral(
     romanNumeralRequest: RomanNumeralRequest,
   ): Promise<RomanNumeralConversion | RomanNumeralConversions> {
     try {
       const { query, min, max } = romanNumeralRequest
+      this.romanNumeralCalledCounter.add(1);
 
       if (query === undefined && min === undefined && max === undefined) {
         throw new BadRequestException('No query or range provided.')
@@ -61,6 +76,7 @@ export class RomanNumeralService {
     const cachedResult = await this.cacheManager.get<T>(key)
 
     if (cachedResult) {
+      this.romanNumeralFromCacheCounter.add(1);
       this.logger.log(`Pulled from cache: ${key}`)
       return cachedResult
     }
